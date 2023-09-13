@@ -10,9 +10,19 @@ on:
 jobs:
   build:
     if: |
-      github.triggering_actor != 'dependabot[bot]'
-      && contains(fromJSON('["fix", "feat", "chore", "test", "build", "ci", "perf", "refactor", "revert", "style"]'), github.event.head_commit.message)
-      && !contains(github.event.head_commit.message, '!skip!')
+      github.triggering_actor != 'dependabot[bot]'         &&
+      (startsWith(github.event.head_commit.message, 'feat')  ||
+        startsWith(github.event.head_commit.message, 'fix')  ||
+        startsWith(github.event.head_commit.message, 'chore') ||
+        startsWith(github.event.head_commit.message, 'build') ||
+        startsWith(github.event.head_commit.message, 'ci') ||
+        startsWith(github.event.head_commit.message, 'perf') ||
+        startsWith(github.event.head_commit.message, 'refactor') ||
+        startsWith(github.event.head_commit.message, 'revert') ||
+        startsWith(github.event.head_commit.message, 'style') ||
+        startsWith(github.event.head_commit.message, 'test') ||
+        startsWith(github.event.head_commit.message, 'Merge')
+      ) && !contains(github.event.head_commit.message, '!skip!')
     runs-on: ubuntu-latest
     permissions:
       packages: write
