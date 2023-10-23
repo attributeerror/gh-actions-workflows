@@ -82,7 +82,7 @@ jobs:
                       { "type": "revert", "release": "patch" },
                       { "type": "style", "release": "patch" },
                       { "type": "test", "release": "patch" },
-                      { "scope": "no-release", "no-release": true }
+                      { "scope": "no-release", "release": false }
                     ],
                     "parserOpts": {
                       "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
