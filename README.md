@@ -17,10 +17,10 @@ on:
 
 jobs:
   build:
-    uses: attributeerror/gh-actions-workflows/.github/workflows/build-node-docker-image.yaml@main
+    uses: attributeerror/gh-actions-workflows/.github/workflows/build-docker-image.yaml@main
     permissions:
-      packages: write
-      contents: read
+      packages: write # to be able to push Docker images
+      contents: write # to be able to tag commits
     with:
       package-name: daisuke-bot
 ```

@@ -9,3 +9,13 @@ updates:
       - "attributeerror"
     commit-message:
       prefix: "github-actions"
+
+  # Maintain Docker image versions
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "attributeerror"
+    commit-message:
+      prefix: "docker"

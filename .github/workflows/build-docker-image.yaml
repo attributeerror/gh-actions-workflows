@@ -6,6 +6,7 @@ on:
       package-name:
         type: string
         required: true
+        description: 'The name for the Docker image that gets pushed.'
 
 jobs:
   build:
@@ -22,19 +23,14 @@ jobs:
         startsWith(github.event.head_commit.message, 'style') ||
         startsWith(github.event.head_commit.message, 'test') ||
         startsWith(github.event.head_commit.message, 'Merge')
-      ) && !contains(github.event.head_commit.message, '!skip!')
+      ) && !contains(github.event.head_commit.message, '[skip ci]')
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: Setup Golang
-        uses: actions/setup-go@v4
-        with:
-          go-version: '^1.21.0'
       
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -49,8 +45,40 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           logout: true
-      
+
+      - name: Run Semantic Release
+        uses: docker://ghcr.io/codfish/semantic-release-action@sha256:cfb2b8231400c4bcb0abb8403c38aaff0c865e1bae8892b9b40893db9ef49403
+        id: semantic
+        with:
+          branches: |
+            [
+              'main',
+              {
+                name: 'alpha',
+                prerelease: true
+              },
+              {
+                name: 'beta',
+                prerelease: true
+              }
+            ]
+          tag_format: 'v${version}'
+          plugins: |
+              [
+                '@semantic-release/commit-analyzer',
+              ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build & push the Docker image
+        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          docker build --file Dockerfile --tag ghcr.io/attributeerror/${{ inputs.package-name }}:$(git log --format="%h" -n 1) .
-          docker push ghcr.io/attributeerror/${{ inputs.package-name }}:$(git log --format="%h" -n 1)
+          docker build --file Dockerfile --tag ghcr.io/attributeerror/${{ inputs.package-name }}:$TAG .
+          docker push ghcr.io/attributeerror/${{ inputs.package-name }}:$TAG
+        env:
+          TAG: v${{ steps.semantic.outputs.release-version }}
+
+      - name: Delete tag if build unsuccessful
+        if: failure()
+        shell: bash
+        run: git push origin refs/tags/v${{ steps.semantic.outputs.release-version }} --delete
