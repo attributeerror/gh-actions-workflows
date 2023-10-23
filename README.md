@@ -15,6 +15,11 @@ on:
       - 'feature/**'
       - 'bugfix/**'
 
+# Cancel jobs that are already running for the same branch/pull request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+  
 jobs:
   build:
     uses: attributeerror/gh-actions-workflows/.github/workflows/build-docker-image.yaml@main

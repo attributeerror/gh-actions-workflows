@@ -24,9 +24,6 @@ jobs:
         startsWith(github.event.head_commit.message, 'test') ||
         startsWith(github.event.head_commit.message, 'Merge')
       ) && !contains(github.event.head_commit.message, '[skip ci]')
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
