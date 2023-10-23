@@ -85,6 +85,7 @@ jobs:
                       { "type": "refactor", "release": "patch" },
                       { "type": "revert", "release": "patch" },
                       { "type": "test", "release": "patch" },
+                      { "type": "npm", "release": "patch" },
                       { "scope": "no-release", "release": false }
                     ],
                     "parserOpts": {
