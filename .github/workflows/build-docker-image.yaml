@@ -69,7 +69,7 @@ jobs:
           plugins: |
               [
                 [
-                  '@semantic-release/commit-analyzer',
+                  "@semantic-release/commit-analyzer",
                   "releaseRules": [
                     { "type": "feat", "release": "minor" },
                     { "type": "fix", "release": "patch" },
