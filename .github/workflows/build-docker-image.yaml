@@ -7,6 +7,10 @@ on:
         type: string
         required: true
         description: 'The name for the Docker image that gets pushed.'
+    outputs:
+      version:
+        description: 'The version determined via Semantic Release'
+        value: ${{ jobs.build.outputs.version }}      
 
 jobs:
   build:
@@ -24,6 +28,8 @@ jobs:
         startsWith(github.event.head_commit.message, 'test') ||
         startsWith(github.event.head_commit.message, 'Merge')
       ) && !contains(github.event.head_commit.message, '[skip ci]')
+    outputs:
+        version: v${{ steps.semantic.outputs.release-version }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
