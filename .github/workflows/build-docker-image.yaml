@@ -107,10 +107,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/attributeerror/${{ inputs.package-name }}:$TAG
+          tags: ghcr.io/attributeerror/${{ inputs.package-name }}:v${{ steps.semantic.outputs.release-version }}
           build-args: ${{ inputs.docker-build-args }}
-        env:
-          TAG: v${{ steps.semantic.outputs.release-version }}
 
       - name: Delete tag if build unsuccessful
         if: failure()
