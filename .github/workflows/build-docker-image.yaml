@@ -7,6 +7,10 @@ on:
         type: string
         required: true
         description: 'The name for the Docker image that gets pushed.'
+      docker-build-args:
+        type: string
+        required: false
+        description: 'A JSON array of build arguments to pass to Docker.'
     outputs:
       version:
         description: 'The version determined via Semantic Release'
@@ -97,10 +101,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Map Docker build arguments
+        if: ${{ inputs.docker-build-args != '' }}
+        id: map-docker-build-args
+        run: |
+          echo "DOCKER_BUILD_ARGS=$(echo ${{ inputs.docker-build-args }} | jq '("--build-arg " + .[])' | sed 's/"//g')" >> $GITHUB_OUTPUT
+
       - name: Build & push the Docker image
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          docker build --file Dockerfile --tag ghcr.io/attributeerror/${{ inputs.package-name }}:$TAG .
+          docker build --file Dockerfile --tag ghcr.io/attributeerror/${{ inputs.package-name }}:$TAG ${{ steps.map-docker-build-args.outputs.DOCKER_BUILD_ARGS }} .
           docker push ghcr.io/attributeerror/${{ inputs.package-name }}:$TAG
         env:
           TAG: v${{ steps.semantic.outputs.release-version }}
