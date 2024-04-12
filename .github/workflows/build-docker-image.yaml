@@ -90,6 +90,7 @@ jobs:
                       { "type": "revert", "release": "patch" },
                       { "type": "test", "release": "patch" },
                       { "type": "npm", "release": "patch" },
+                      { "type": "build", "scope": "deps", "release": "patch" },
                       { "scope": "no-release", "release": false }
                     ],
                     "parserOpts": {
