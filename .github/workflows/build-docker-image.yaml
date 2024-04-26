@@ -75,30 +75,41 @@ jobs:
             ]
           tag_format: 'v${version}'
           plugins: |
+            [
               [
-                [
-                  "@semantic-release/commit-analyzer",
-                  {
-                    "releaseRules": [
-                      { "breaking": true, "release": "major" },
-                      { "revert": true, "release": "patch" },
-                      { "type": "feat", "release": "minor" },
-                      { "type": "fix", "release": "patch" },
-                      { "type": "chore", "release": "patch" },
-                      { "type": "perf", "release": "patch" },
-                      { "type": "refactor", "release": "patch" },
-                      { "type": "revert", "release": "patch" },
-                      { "type": "test", "release": "patch" },
-                      { "type": "npm", "release": "patch" },
-                      { "type": "build", "scope": "deps", "release": "patch" },
-                      { "scope": "no-release", "release": false }
-                    ],
-                    "parserOpts": {
-                      "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
-                    }
+                "@semantic-release/commit-analyzer",
+                {
+                  "releaseRules": [
+                    { "breaking": true, "release": "major" },
+                    { "revert": true, "release": "patch" },
+                    { "type": "feat", "release": "minor" },
+                    { "type": "fix", "release": "patch" },
+                    { "type": "chore", "release": "patch" },
+                    { "type": "perf", "release": "patch" },
+                    { "type": "refactor", "release": "patch" },
+                    { "type": "revert", "release": "patch" },
+                    { "type": "test", "release": "patch" },
+                    { "type": "npm", "release": "patch" },
+                    { "type": "build", "scope": "deps", "release": "patch" },
+                    { "scope": "no-release", "release": false }
+                  ],
+                  "parserOpts": {
+                    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
                   }
-                ]
+                }
+              ],
+              [
+                "@semantic-release/release-notes-generator",
+                {
+                  "parserOpts": {
+                    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
+                  },
+                  "writerOpts": {
+                    "commitsSort": ["subject", "scope"]
+                  }
+                }
               ]
+            ]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -110,6 +121,16 @@ jobs:
           push: true
           tags: ghcr.io/attributeerror/${{ inputs.package-name }}:v${{ steps.semantic.outputs.release-version }}
           build-args: ${{ inputs.docker-build-args }}
+
+      - name: Create Release
+        if: success() && github.event_name == 'push' && github.ref_name == 'main' && steps.semantic.outputs.new-release-published == 'true'
+        uses: softprops/action-gh-release@9b795e578288d5ff64564dfa7dd4cda7b04bb648 # v2.0.4
+        with:
+          tag_name: v${{ steps.semantic.outputs.release-version }}
+          body: ${{ steps.semantic.outputs.release-notes }}
+          draft: false
+          prerelease: false
+          make_latest: true
 
       - name: Delete tag if build unsuccessful
         if: failure()
