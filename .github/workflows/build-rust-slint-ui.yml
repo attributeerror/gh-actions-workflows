@@ -10,10 +10,6 @@ on:
         description: 'Whether Semantic release determines a new version should be pubhlished.'
         value: ${{ jobs.build.outputs.new-release-published }}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: true
-
 jobs:
   validate-rust:
     runs-on: ubuntu-latest
