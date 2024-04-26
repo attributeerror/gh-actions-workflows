@@ -19,7 +19,7 @@ jobs:
       
       - name: Install Rust
         run: |
-          curl https://win.rustup.rs -o rustup.exe && rustup.exe toolchain install stable --profile minimal
+          curl https://sh.rustup.rs -o rustup.sh && chmod +x rustup.sh && ./rustup.sh toolchain install stable --profile minimal
 
       - name: Compile Rust binaries
         run: |
