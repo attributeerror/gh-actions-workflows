@@ -68,7 +68,7 @@ jobs:
 
       - name: Run Semantic Release
         id: semantic
-        run: node gh-actions-workflows/.github/workflows/scripts/run_semantic_release.mjs
+        run: node ./gh-actions-workflows/.github/workflows/scripts/run_semantic_release.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
