@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # actions/checkout@v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # actions/checkout@v4
       
       - name: Install Rust
         run: |
@@ -48,7 +48,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # actions/checkout@v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # actions/checkout@v4
 
       - name: Setup NodeJS
         uses: actions/setup-node@c2ac33f2c62f978d6c944d9648125a294e56dc0b # actions/setup-node@v4.0.2
@@ -60,7 +60,7 @@ jobs:
         run: npm install --no-save --no-audit --no-fund --force semantic-release @actions/core
 
       - name: Download Semantic Release script
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # actions/checkout@v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # actions/checkout@v4
         with:
           repository: 'attributeerror/gh-actions-workflows'
           path: 'gh-actions-workflows'
