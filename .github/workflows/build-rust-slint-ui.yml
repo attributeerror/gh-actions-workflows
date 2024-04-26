@@ -1,0 +1,107 @@
+name: Build & Release Rust Slint UI
+
+on:
+  workflow_call:
+    outputs:
+      version:
+        description: 'The version determined via Semantic Release'
+        value: ${{ jobs.build.outputs.version }}
+      new-release-published:
+        description: 'Whether Semantic release determines a new version should be pubhlished.'
+        value: ${{ jobs.build.outputs.new-release-published }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  validate-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # actions/checkout@v4
+      
+      - name: Install Rust
+        run: |
+          curl https://win.rustup.rs -o rustup.exe && rustup.exe toolchain install stable --profile minimal
+
+      - name: Compile Rust binaries
+        run: |
+          cargo build --release
+
+  build:
+    needs: validate-rust
+    if: |
+      github.event_name == 'push' && github.ref_name == 'main' &&
+      github.triggering_actor != 'dependabot[bot]'         &&
+      (startsWith(github.event.head_commit.message, 'feat')  ||
+      startsWith(github.event.head_commit.message, 'fix')  ||
+      startsWith(github.event.head_commit.message, 'chore') ||
+      startsWith(github.event.head_commit.message, 'build') ||
+      startsWith(github.event.head_commit.message, 'ci') ||
+      startsWith(github.event.head_commit.message, 'perf') ||
+      startsWith(github.event.head_commit.message, 'refactor') ||
+      startsWith(github.event.head_commit.message, 'revert') ||
+      startsWith(github.event.head_commit.message, 'style') ||
+      startsWith(github.event.head_commit.message, 'test') ||
+      startsWith(github.event.head_commit.message, 'Merge')
+      ) && !contains(github.event.head_commit.message, '[skip ci]')
+    outputs:
+      version: v${{ steps.semantic.outputs.release-version }}
+      new-release-published: ${{ steps.semantic.outputs.new-release-published }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@c2ac33f2c62f978d6c944d9648125a294e56dc0b # actions/setup-node@v4.0.2
+        with:
+          node-version: '>=20.0.0'
+          check-latest: true
+
+      - name: Install Node Dependencies
+        run: npm install --no-save --no-audit --no-fund --force semantic-release @actions/core
+
+      - name: Run Semantic Release
+        id: semantic
+        run: node .github/workflows/scripts/run_semantic_release.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Rust
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          rustup toolchain install stable --profile minimal && cargo install cargo-wix
+
+      - name: Download WiX Binaries
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          curl https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -o wix314.zip && mkdir wix314 && tar -x -C wix314 -f wix314.zip
+              
+      - name: Add WiX to PATH
+        if: steps.semantic.outputs.new-release-published == 'true'
+        shell: pwsh
+        run: |
+          "$env:GITHUB_WORKSPACE/wix314" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Generate WiX Installer
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          cargo wix --install-version ${{ steps.semantic.outputs.release-version }} --nocapture
+            
+      - name: Create Release
+        if: success() && github.event_name == 'push' && github.ref_name == 'main' && steps.semantic.outputs.new-release-published == 'true'
+        uses: softprops/action-gh-release@9b795e578288d5ff64564dfa7dd4cda7b04bb648 # v2.0.4
+        with:
+          tag_name: v${{ steps.semantic.outputs.release-version }}
+          body: ${{ steps.semantic.outputs.release-notes }}
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: '**/*.msi'
+
+      - name: Delete tag if build unsuccessful
+        if: failure()
+        shell: bash
+        run: git push origin refs/tags/v${{ steps.semantic.outputs.release-version }} --delete
