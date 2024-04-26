@@ -59,9 +59,16 @@ jobs:
       - name: Install Node Dependencies
         run: npm install --no-save --no-audit --no-fund --force semantic-release @actions/core
 
+      - name: Download Semantic Release script
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # actions/checkout@v4
+        with:
+          repository: 'attributeerror/gh-actions-workflows'
+          path: 'gh-actions-workflows'
+          ref: 'main'
+
       - name: Run Semantic Release
         id: semantic
-        run: node .github/workflows/scripts/run_semantic_release.mjs
+        run: node gh-actions-workflows/.github/workflows/scripts/run_semantic_release.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
