@@ -101,8 +101,28 @@ jobs:
               [
                 "@semantic-release/release-notes-generator",
                 {
+                  "preset": "conventialcommits",
+                  "presetConfig": {
+                    "types": [
+                      { "type": "feat", "section": "✨ Features" },
+                      { "type": "fix", "section": "🐛 Bug Fixes" },
+                      { "type": "chore", "section": "🙂 Chores" },
+                      { "type": "perf", "section": "🚄 Performance Improvements" },
+                      { "type": "refactor", "hidden": true },
+                      { "type": "npm", "section": "🤖 Dependency Updates" },
+                      { "type": "build", "section": "🤖 Dependency Updates" },
+                    ]
+                  },
                   "parserOpts": {
-                    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
+                    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"],
+                    "headerPattern": /^(\w*)(?:\((.*)\))?: (.*)$/,
+                    "headerCorrespondence": [
+                      "type",
+                      "scope",
+                      "subject"
+                    ],
+                    "revertPattern": "/^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w{7,40})\b/i",
+                    "revertCorrespondence": ["header", "hash"]
                   },
                   "writerOpts": {
                     "commitsSort": ["subject", "scope"]
