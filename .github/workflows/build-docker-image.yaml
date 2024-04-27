@@ -101,7 +101,7 @@ jobs:
               [
                 "@semantic-release/release-notes-generator",
                 {
-                  "preset": "conventialcommits",
+                  "preset": "conventionalcommits",
                   "presetConfig": {
                     "types": [
                       { "type": "feat", "section": "✨ Features" },
