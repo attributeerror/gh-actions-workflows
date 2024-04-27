@@ -110,7 +110,7 @@ jobs:
                       { "type": "perf", "section": "🚄 Performance Improvements" },
                       { "type": "refactor", "hidden": true },
                       { "type": "npm", "section": "🤖 Dependency Updates" },
-                      { "type": "build", "section": "🤖 Dependency Updates" },
+                      { "type": "build", "section": "🤖 Dependency Updates" }
                     ]
                   },
                   "parserOpts": {
