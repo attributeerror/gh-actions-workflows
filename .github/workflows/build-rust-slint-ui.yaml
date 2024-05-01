@@ -53,7 +53,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@c2ac33f2c62f978d6c944d9648125a294e56dc0b # actions/setup-node@v4.0.2
         with:
-          node-version: '>=20.0.0'
+          node-version: '20.12.2'
           check-latest: true
 
       - name: Install Node Dependencies
