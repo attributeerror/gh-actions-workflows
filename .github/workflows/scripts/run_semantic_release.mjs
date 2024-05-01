@@ -113,6 +113,20 @@ async function run() {
 	const { version, notes, type, channel, gitHead, gitTag, name } = nextRelease;
 	const [ major, minor, patch ] = version.split(".");
 
+	// Export environment variables
+	core.exportVariable('NEW_RELEASE_PUBLISHED', 'true');
+	core.exportVariable('RELEASE_VERSION', version);
+	core.exportVariable('RELEASE_MAJOR', major);
+	core.exportVariable('RELEASE_MINOR', minor);
+	core.exportVariable('RELEASE_PATCH', patch);
+	core.exportVariable('RELEASE_NOTES', notes);
+	core.exportVariable('RELEASE_TYPE', type);
+	core.exportVariable('RELEASE_CHANNEL', channel);
+	core.exportVariable('RELEASE_GIT_HEAD', gitHead);
+	core.exportVariable('RELEASE_GIT_TAG', gitTag);
+	core.exportVariable('RELEASE_NAME', name);
+
+	// Export step outputs
 	core.setOutput('new-release-published', 'true');
 	core.setOutput('release-version', version);
 	core.setOutput('release-major', major);
