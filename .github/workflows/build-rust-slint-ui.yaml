@@ -59,7 +59,7 @@ jobs:
       - name: Update 'version' in Cargo.toml
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          sed -i "0,/version/s/^version = `"\([0-9.]*\)`"$/version = `"$RELEASE_VERSION`"/" Cargo.toml && cat Cargo.toml
+          sed -i "0,/version/s/^version = `"\([0-9.]*\)`"$/version = `"${{ steps.semantic.outputs.release-version }}`"/" Cargo.toml && cat Cargo.toml
 
       - name: Install Rust
         if: steps.semantic.outputs.new-release-published == 'true'
