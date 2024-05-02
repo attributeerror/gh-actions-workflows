@@ -11,22 +11,7 @@ on:
         value: ${{ jobs.build.outputs.new-release-published }}
 
 jobs:
-  validate-rust:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # actions/checkout@v4
-      
-      - name: Install Rust
-        run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal --default-toolchain stable -y
-
-      - name: Compile Rust binaries
-        run: |
-          cargo build --release
-
   build:
-    needs: validate-rust
     if: |
       github.event_name == 'push' && github.ref_name == 'main' &&
       github.triggering_actor != 'dependabot[bot]'         &&
@@ -74,17 +59,22 @@ jobs:
       - name: Update 'version' in Cargo.toml
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          sed -i '0,/version/s/^version = "\([0-9.]*\)"$/version = "'"$RELEASE_VERSION"'"/' Cargo.toml && cat Cargo.toml
+          sed -i "0,/version/s/^version = `"\([0-9.]*\)`"$/version = `"$RELEASE_VERSION`"/" Cargo.toml && cat Cargo.toml
 
       - name: Install Rust
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          rustup toolchain install stable --profile minimal && cargo install cargo-wix
+          rustup toolchain install stable --profile minimal
+      
+      - name: Build Rust binaries
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          cargo build --release
 
       - name: Download WiX Binaries
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          curl https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -o wix314.zip && mkdir wix314 && tar -x -C wix314 -f wix314.zip
+          cargo install cargo-wix && curl https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -o wix314.zip && mkdir wix314 && tar -x -C wix314 -f wix314.zip
               
       - name: Add WiX to PATH
         if: steps.semantic.outputs.new-release-published == 'true'
