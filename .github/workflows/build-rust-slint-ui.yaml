@@ -89,7 +89,7 @@ jobs:
             
       - name: Create Release
         if: success() && github.event_name == 'push' && github.ref_name == 'main' && steps.semantic.outputs.new-release-published == 'true'
-        uses: softprops/action-gh-release@3989e4b325fd35af0f19f42a37021d50b48b77e0 # v2.0.4
+        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.4
         with:
           tag_name: v${{ steps.semantic.outputs.release-version }}
           body: ${{ steps.semantic.outputs.release-notes }}
