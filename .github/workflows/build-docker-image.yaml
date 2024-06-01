@@ -5,8 +5,8 @@ on:
     inputs:
       package-name:
         type: string
-        required: true
-        description: 'The name for the Docker image that gets pushed.'
+        required: false
+        description: 'DEPRECATED - The name for the Docker image that gets pushed.'
       docker-build-args:
         type: string
         required: false
@@ -65,7 +65,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/attributeerror/${{ inputs.package-name }}:v${{ needs.determine-release-version.outputs.version }}
+          tags: ghcr.io/${{ github.action_repository }}:v${{ needs.determine-release-version.outputs.version }}
           build-args: ${{ inputs.docker-build-args }}
 
       - name: Create Release
