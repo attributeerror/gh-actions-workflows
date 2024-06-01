@@ -6,7 +6,7 @@ on:
       package-name:
         type: string
         required: false
-        description: 'DEPRECATED - The name for the Docker image that gets pushed.'
+        description: 'The name for the Docker image that gets pushed.'
       docker-build-args:
         type: string
         required: false
@@ -59,13 +59,20 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           logout: true
 
+      - name: Get repository name
+        if: inputs.package-name == '' && needs.determine-release-version.outputs.new-release-published == 'true'
+        env:
+          REPOSITORY: ${{ github.repository }}
+        id: repo-name
+        run: echo "::set-output name=repository_name::${REPOSITORY##*/}"
+
       - name: Build & push the Docker image
         if: needs.determine-release-version.outputs.new-release-published == 'true'
         uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # docker/build-push-action@v5.3.0
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.action_repository }}:v${{ needs.determine-release-version.outputs.version }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ inputs.package-name || steps.repo-name.outputs.repository_name }}:v${{ needs.determine-release-version.outputs.version }}
           build-args: ${{ inputs.docker-build-args }}
 
       - name: Create Release
