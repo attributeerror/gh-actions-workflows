@@ -64,7 +64,7 @@ jobs:
         env:
           REPOSITORY: ${{ github.repository }}
         id: repo-name
-        run: echo "::set-output name=repository_name::${REPOSITORY##*/}"
+        run: echo "repository_name=${REPOSITORY##*/}" >> $GITHUB_OUTPUT
 
       - name: Build & push the Docker image
         if: needs.determine-release-version.outputs.new-release-published == 'true'
