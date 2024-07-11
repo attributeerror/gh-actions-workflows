@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # actions/checkout@v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # actions/checkout@v4.1.7
       
       - name: Setup QEMU
         uses: docker/setup-qemu-action@5927c834f5b4fdf503fca6f4c7eccda82949e1ee # docker/setup-qemu-action@v3.1.0
