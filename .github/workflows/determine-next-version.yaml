@@ -75,6 +75,7 @@ jobs:
                     { 'type': 'test', 'release': 'patch' },
                     { 'type': 'npm', 'release': 'patch' },
                     { 'type': 'build', 'scope': 'deps', 'release': 'patch' },
+                    { 'type': 'build', 'scope': 'deps-dev', 'release': 'patch' },
                     { 'scope': 'no-release', 'release': false }
                   ],
                   'parserOpts': {
