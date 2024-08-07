@@ -74,6 +74,7 @@ jobs:
                     { 'type': 'revert', 'release': 'patch' },
                     { 'type': 'test', 'release': 'patch' },
                     { 'type': 'npm', 'release': 'patch' },
+                    { 'type': 'go', 'release': 'patch' },
                     { 'type': 'build', 'scope': 'deps', 'release': 'patch' },
                     { 'type': 'build', 'scope': 'deps-dev', 'release': 'patch' },
                     { 'scope': 'no-release', 'release': false }
@@ -94,6 +95,7 @@ jobs:
                       { 'type': 'perf', 'section': '🚄 Performance Improvements' },
                       { 'type': 'refactor', 'hidden': true },
                       { 'type': 'npm', 'section': '🤖 Dependency Updates' },
+                      { 'type': 'go', 'section': '🤖 Dependency Updates' },
                       { 'type': 'build', 'section': '🤖 Dependency Updates' }
                     ]
                   },
