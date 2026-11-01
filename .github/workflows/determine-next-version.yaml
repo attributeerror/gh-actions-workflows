@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # actions/checkout@v4.2.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # actions/checkout@v7.0.1
 
       - name: Run Semantic Release
         uses: docker://ghcr.io/codfish/semantic-release-action@sha256:71048986f7e28f024cbad0ef106a7ef20b9b0d322f3a8aa51d89f1c424e75061 # codfish/semantic-release-action@v3.3.0
