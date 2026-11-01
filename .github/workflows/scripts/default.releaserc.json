@@ -9,6 +9,7 @@
     [
       "@semantic-release/commit-analyzer",
       {
+        "preset": "conventionalcommits",
         "releaseRules": [
           { "breaking": true, "release": "major" },
           { "revert": true, "release": "patch" },
@@ -33,6 +34,7 @@
     [
       "@semantic-release/release-notes-generator",
       {
+        "preset": "conventionalcommits",
         "presetConfig": {
           "types": [
             { "type": "feat", "section": "✨ Features" },
