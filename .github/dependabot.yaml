@@ -10,6 +10,22 @@ updates:
     commit-message:
       prefix: "github-actions"
 
+  # Maintain the semantic-release script's npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/.github/workflows/scripts"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "attributeerror"
+    commit-message:
+      prefix: "npm"
+    ignore:
+      # v10+ needs conventional-changelog-writer 9, but
+      # @semantic-release/release-notes-generator still ships writer 8.
+      # Remove once semantic-release moves to writer 9.
+      - dependency-name: "conventional-changelog-conventionalcommits"
+        update-types: ["version-update:semver-major"]
+
   # Maintain Docker image versions
   - package-ecosystem: "docker"
     directory: "/"

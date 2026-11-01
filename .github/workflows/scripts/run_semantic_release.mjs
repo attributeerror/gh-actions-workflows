@@ -1,117 +1,59 @@
-import * as childProcess from 'child_process';
-import core from '@actions/core';
+import { copyFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import * as core from '@actions/core';
+import { cosmiconfig } from 'cosmiconfig';
 import semanticRelease from 'semantic-release';
 
-const setGitConfigSafeDirectory = () => {
-	try {
-		core.debug(`Enabling GitHub workspace as a git safe directory`);
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const defaultConfigPath = join(scriptDir, 'default.releaserc.json');
 
-		const spawn = childProcess.spawnSync(
-			'git',
-			['config', '--global', '--add', 'safe.directory', process.env.GITHUB_WORKSPACE],
-		);
+/**
+ * Use the repository's own semantic-release config when it has one; otherwise
+ * write the default config to `.releaserc.json` in the working directory.
+ * The lookup is the same one semantic-release performs, so any config it would
+ * pick up (package.json "release" key, .releaserc*, release.config.*) counts.
+ */
+const ensureReleaseConfig = async (cwd) => {
+	const existing = await cosmiconfig('release').search(cwd);
 
-		if (spawn.status !== 0) {
-			throw new Error(spawn.stderr);
-		}
-
-		core.debug(`Set ${process.env.GITHUB_WORKSPACE} as a safe directory.`);
-	} catch (err) {
-		core.debug(`Error setting ${process.env.GITHUB_WORKSPACE} as a safe directory.`);
-		throw err;
+	if (existing && !existing.isEmpty) {
+		core.info(`Using existing semantic-release config: ${existing.filepath}`);
+		return;
 	}
+
+	const target = join(cwd, '.releaserc.json');
+	copyFileSync(defaultConfigPath, target);
+	core.info(`No semantic-release config found; created ${target} from the default config.`);
 };
 
 async function run() {
-	const branches = [
-		'main',
-		{
-			name: 'alpha',
-			prerelease: true
-		},
-		{
-			name: 'beta',
-			prerelease: true
-		}
-	];
-	const plugins = [
-		[
-			"@semantic-release/commit-analyzer",
-			{
-				"releaseRules": [
-					{ "breaking": true, "release": "major" },
-					{ "revert": true, "release": "patch" },
-					{ "type": "feat", "release": "minor" },
-					{ "type": "fix", "release": "patch" },
-					{ "type": "chore", "release": "patch" },
-					{ "type": "perf", "release": "patch" },
-					{ "type": "refactor", "release": "patch" },
-					{ "type": "revert", "release": "patch" },
-					{ "type": "test", "release": "patch" },
-					{ "type": "npm", "release": "patch" },
-					{ "type": "build", "scope": "deps", "release": "patch" },
-					{ "scope": "no-release", "release": false }
-				],
-				"parserOpts": {
-					"noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
-				}
-			}
-		],
-		[
-			"@semantic-release/release-notes-generator",
-			{
-				"parserOpts": {
-					"noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
-				},
-				"writerOpts": {
-					"commitsSort": ["subject", "scope"]
-				}
-			}
-		]
-	];
-	const tagFormat = "v${version}";
+	const cwd = process.cwd();
 
-	core.debug(`branches: ${branches}`);
-	core.debug(`plugins: ${plugins}`);
-	core.debug(`tag-format: ${tagFormat}`);
+	await ensureReleaseConfig(cwd);
 
-	setGitConfigSafeDirectory();
+	const result = await semanticRelease({}, { cwd, env: process.env });
 
-	const options = {
-		branches,
-		plugins,
-		tagFormat,
-	};
+	if (!result || !result.nextRelease) {
+		core.info('No release published.');
 
-	core.debug(`Options before cleanup: ${JSON.stringify(options)}`);
-
-	Object.keys(options).forEach(
-		key => (options[key] === undefined || options[key] === '') && delete options[key]
-	);
-
-	core.debug(`Options after cleanup: ${JSON.stringify(options)}`);
-
-	const result = await semanticRelease(options);
-	if (!result) {
-		core.debug(`no release published`);
-
-		core.exportVariable('NEW_RELEASED_PUBLISHED', 'false');
+		core.exportVariable('NEW_RELEASE_PUBLISHED', 'false');
 		core.setOutput('new-release-published', 'false');
 		return;
 	}
 
 	const { lastRelease, nextRelease, commits } = result;
 
-	core.debug(
+	core.info(
 		`Published ${nextRelease.type} release version ${nextRelease.version} containing ${commits.length} commits.`,
 	);
 
 	if (lastRelease.version) {
-		core.debug(`The last release was "${lastRelease.version}".`);
+		core.info(`The last release was "${lastRelease.version}".`);
 	}
 
 	const { version, notes, type, channel, gitHead, gitTag, name } = nextRelease;
-	const [ major, minor, patch ] = version.split(".");
+	const [major, minor, patch] = version.split(/[.-]/, 3);
 
 	// Export environment variables
 	core.exportVariable('NEW_RELEASE_PUBLISHED', 'true');
