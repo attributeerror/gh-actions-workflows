@@ -63,7 +63,7 @@ jobs:
 
       - name: Create Release
         if: success() && github.event_name == 'push' && github.ref_name == 'main' && needs.determine-release-version.outputs.new-release-published == 'true'
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # softprops/action-gh-release@v3.0.3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # softprops/action-gh-release@v3.0.4
         with:
           tag_name: ${{ needs.determine-release-version.outputs.git-tag }}
           body: ${{ needs.determine-release-version.outputs.release-notes }}
